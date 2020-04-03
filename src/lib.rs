@@ -125,7 +125,7 @@ impl QVVoting{
         }
         false
     }
-    pub fn get_balance(&self,name : String) -> u128{
+    pub fn balance_of(&self,name : String) -> u128{
         self.balances.get(&name).unwrap_or(&0).clone()
     }
     fn get_balance_mut(&mut self,name : String) ->&mut u128{
