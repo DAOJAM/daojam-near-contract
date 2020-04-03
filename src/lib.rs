@@ -76,6 +76,9 @@ impl QVVoting{
                 "voting period has not expired");
         self.proposals[proposal_id].status = ProposalStatus::ENDED;
     }
+    pub fn get_create_cost(&self) -> u128 { self.create_cost }
+    pub fn get_proposal_count(&self) -> usize {self.proposals.len()}
+    pub fn get_total_supply(&self) -> u128 {self.total_supply}
     pub fn set_create_cost(&mut self,cost : u128){
         only_owner!(self);
         self.create_cost = cost;
@@ -124,6 +127,11 @@ impl QVVoting{
             if k == name { return true}
         }
         false
+    }
+    pub fn mint(&mut self,name : String,amount:u128) {
+        only_owner!(self);
+        self.total_supply += amount;
+        *(self.get_balance_mut(name))+=amount;
     }
     pub fn balance_of(&self,name : String) -> u128{
         self.balances.get(&name).unwrap_or(&0).clone()
