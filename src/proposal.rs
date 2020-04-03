@@ -1,6 +1,7 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 use std::collections::HashMap;
-#[derive(BorshSerialize,BorshDeserialize,PartialEq,Clone)]
+use serde::{Serialize,Deserialize};
+#[derive(BorshSerialize,BorshDeserialize,PartialEq,Clone,Serialize,Deserialize)]
 pub enum ProposalStatus{
     IN_PROGRESS,
     TALLY,
@@ -23,13 +24,13 @@ impl Into<String> for ProposalStatus {
     }
 }
 
-#[derive(Default,BorshSerialize,BorshDeserialize)]
+#[derive(Default,BorshSerialize,BorshDeserialize,Clone,Serialize,Deserialize)]
 pub struct Voter{
     pub has_voted: bool,
     pub vote : bool,
     pub weight : u128
 }
-#[derive(Default,BorshSerialize,BorshDeserialize)]
+#[derive(Default,BorshSerialize,BorshDeserialize,Clone,Serialize,Deserialize)]
 pub struct Proposal{
     pub creator :String,
     pub status :ProposalStatus,

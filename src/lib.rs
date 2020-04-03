@@ -79,12 +79,14 @@ impl QVVoting{
     pub fn get_create_cost(&self) -> u128 { self.create_cost }
     pub fn get_proposal_count(&self) -> usize {self.proposals.len()}
     pub fn get_total_supply(&self) -> u128 {self.total_supply}
+    pub fn get_proposal(&self,proposal_id:usize) -> Proposal {
+        self.proposals[proposal_id].clone()}
     pub fn set_create_cost(&mut self,cost : u128){
         only_owner!(self);
         self.create_cost = cost;
     }
-    pub fn get_proposal_status(&self,proposal_id:usize) -> String{
-        self.proposals[proposal_id].status.clone().into()
+    pub fn get_proposal_status(&self,proposal_id:usize) -> ProposalStatus{
+        self.proposals[proposal_id].status.clone()
     }
     pub fn get_proposal_expiration_time(&self,proposal_id:usize) ->u64{
         self.proposals[proposal_id].expiration_time
