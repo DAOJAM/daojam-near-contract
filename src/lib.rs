@@ -36,7 +36,10 @@ impl Default for QVVoting{
             symbol : "QVV".to_owned(),
             create_cost : 100,
             owner: "shellteo".to_owned(),
-            ..Default::default()}
+            balances:HashMap::new(),
+            proposals:Vec::new(),
+            total_supply:0
+        }
     }
 }
 
@@ -54,7 +57,7 @@ impl QVVoting{
             creator : sender,
             status : ProposalStatus::IN_PROGRESS,
             name,description,
-            expiration_time:expiration_time + env::block_timestamp(),
+            expiration_time:expiration_time*1000000000 + env::block_timestamp(),
             ..Default::default()
         });
         self.proposals.len()-1
@@ -116,12 +119,17 @@ impl QVVoting{
         let balance = self.get_balance_mut(sender.clone());
         assert!(*balance>=num_tokens,"do not have enough money to vote");
         *balance-=num_tokens;
-        let weight= f64::sqrt(num_tokens as f64) as u128 + 1;
+        let weight= f64::sqrt(num_tokens as f64) as u128;
         self.proposals[proposal_id].voters.insert(sender,Voter {
             has_voted : true,
             vote,
             weight
         });
+        if vote{
+            self.proposals[proposal_id].yes_votes+=weight;}
+        else {
+            self.proposals[proposal_id].no_votes+=weight;
+        }
 
     }
     fn user_has_voted(&self,name:&str,proposal_id:usize) -> bool{
