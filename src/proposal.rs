@@ -28,7 +28,8 @@ impl Into<String> for ProposalStatus {
 pub struct Voter{
     pub has_voted: bool,
     pub vote : bool,
-    pub weight : u128
+    pub weight : u128,
+    pub block_index : u64,
 }
 #[derive(Default,BorshSerialize,BorshDeserialize,Clone,Serialize,Deserialize)]
 pub struct Proposal{
@@ -39,5 +40,6 @@ pub struct Proposal{
     pub name:String,
     pub description:String,
     pub voters : HashMap<String,Voter>,
-    pub expiration_time:u64
+    pub expiration_time:u64,
+    pub block_index:u64
 }

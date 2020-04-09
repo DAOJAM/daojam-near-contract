@@ -58,6 +58,7 @@ impl QVVoting{
             status : ProposalStatus::IN_PROGRESS,
             name,description,
             expiration_time:expiration_time*1000000000 + env::block_timestamp(),
+            block_index: env::block_index(),
             ..Default::default()
         });
         self.proposals.len()-1
@@ -123,7 +124,8 @@ impl QVVoting{
         self.proposals[proposal_id].voters.insert(sender,Voter {
             has_voted : true,
             vote,
-            weight
+            weight,
+            block_index:env::block_index()
         });
         if vote{
             self.proposals[proposal_id].yes_votes+=weight;}
