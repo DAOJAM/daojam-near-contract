@@ -19,4 +19,3 @@ cargo build --target wasm32-unknown-unknown --release
 ```
 near deploy --accountId <accountId> --wasmFile <file>
 ```
-
