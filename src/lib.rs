@@ -118,8 +118,6 @@ impl QVVoting{
         assert!(proposal.expiration_time >= env::block_timestamp(),
         "for this proposal, the voting time expired");
         let sender = env::signer_account_id();
-        assert!(!self.user_has_voted(&sender,proposal_id),
-                "user already voted on this proposal");
         let balance = self.get_balance_mut(sender.clone());
         assert!(*balance>=num_tokens,"do not have enough money to vote");
         *balance-=num_tokens;
