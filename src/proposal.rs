@@ -18,6 +18,7 @@ pub struct VoteInfo{
     pub voting_powers : u128,
     pub timestamp : u64,
     pub block_index : u64,
+    pub weight : u128
 }
 
 #[derive(BorshSerialize,BorshDeserialize,Clone,Serialize,Deserialize)]

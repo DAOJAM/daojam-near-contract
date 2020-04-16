@@ -124,19 +124,20 @@ impl QVVoting{
 
         let proposal = &mut self.proposals[proposal_id];
         let voter = proposal.voters.entry(sender).or_default();
-        let old_weight = voter.weight;
         voter.vote = vote;
         voter.voting_powers += num_tokens;
-        voter.weight = (voter.voting_powers as f64).sqrt() as u128;
+        let weight = (num_tokens as f64).sqrt() as u128;
+        voter.weight +=weight;
         voter.vote_infos.push(VoteInfo {
             voting_powers:num_tokens,
             block_index:env::block_index()-1,
-            timestamp:env::block_timestamp()
+            timestamp:env::block_timestamp(),
+            weight
         });
         if vote {
-            proposal.yes_votes+=voter.weight-old_weight;
+            proposal.yes_votes+=weight;
         } else {
-            proposal.no_votes+=voter.weight-old_weight;
+            proposal.no_votes+=weight;
         }
 
     }
