@@ -8,8 +8,7 @@ use near_bindgen::{
 };
 use serde_json::json;
 pub mod proposal;
-use crate::proposal::{Proposal, ProposalStatus, Voter};
-use near_bindgen::env::block_timestamp;
+use crate::proposal::{Proposal, ProposalStatus, VoteInfo,Voter};
 
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
@@ -34,7 +33,7 @@ impl Default for QVVoting{
     fn default() -> Self{
         QVVoting {name : "QV Voting".to_owned(),
             symbol : "QVV".to_owned(),
-            create_cost : 100,
+            create_cost : 10,
             owner: "shellteo".to_owned(),
             balances:HashMap::new(),
             proposals:Vec::new(),
@@ -85,6 +84,9 @@ impl QVVoting{
     pub fn get_total_supply(&self) -> u128 {self.total_supply}
     pub fn get_proposal(&self,proposal_id:usize) -> Proposal {
         self.proposals[proposal_id].clone()}
+    pub fn get_voter(&self,proposal_id:usize,voter_name:String) -> Option<Voter> {
+        self.proposals[proposal_id].voters.get(&voter_name).map(|x|x.clone())
+    }
     pub fn set_create_cost(&mut self,cost : u128){
         only_owner!(self);
         self.create_cost = cost;
@@ -110,9 +112,10 @@ impl QVVoting{
         (yes_votes,no_votes)
     }
     pub fn cast_vote(&mut self,proposal_id:usize,num_tokens:u128,vote:bool){
-        assert!(self.proposals[proposal_id].status==ProposalStatus::IN_PROGRESS,
+        let proposal = &self.proposals[proposal_id];
+        assert!(proposal.status==ProposalStatus::IN_PROGRESS,
         "proposal has expired.");
-        assert!(self.proposals[proposal_id].expiration_time >= env::block_timestamp(),
+        assert!(proposal.expiration_time >= env::block_timestamp(),
         "for this proposal, the voting time expired");
         let sender = env::signer_account_id();
         assert!(!self.user_has_voted(&sender,proposal_id),
@@ -120,17 +123,22 @@ impl QVVoting{
         let balance = self.get_balance_mut(sender.clone());
         assert!(*balance>=num_tokens,"do not have enough money to vote");
         *balance-=num_tokens;
-        let weight= f64::sqrt(num_tokens as f64) as u128;
-        self.proposals[proposal_id].voters.insert(sender,Voter {
-            has_voted : true,
-            vote,
-            weight,
-            block_index:env::block_index()-1
+
+        let proposal = &mut self.proposals[proposal_id];
+        let voter = proposal.voters.entry(sender).or_default();
+        let old_weight = voter.weight;
+        voter.vote = vote;
+        voter.voting_powers += num_tokens;
+        voter.weight = (voter.voting_powers as f64).sqrt() as u128;
+        voter.vote_infos.push(VoteInfo {
+            voting_powers:num_tokens,
+            block_index:env::block_index()-1,
+            timestamp:env::block_timestamp()
         });
-        if vote{
-            self.proposals[proposal_id].yes_votes+=weight;}
-        else {
-            self.proposals[proposal_id].no_votes+=weight;
+        if vote {
+            proposal.yes_votes+=voter.weight-old_weight;
+        } else {
+            proposal.no_votes+=voter.weight-old_weight;
         }
 
     }
